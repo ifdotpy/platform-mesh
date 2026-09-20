@@ -283,7 +283,7 @@ func TestAuthorizationModelGeneration_Process(t *testing.T) {
 			},
 		},
 		{
-			name:    "generate model in Process with longestRelationName > 50",
+			name:    "generate model when the resource name leaves no room for the group",
 			binding: newApiBinding("foo", "bar"),
 			mockSetup: func(manager *mocks.MockManager, lister *mocks.MockLister, cluster *mocks.MockCluster, kcpClient *mocks.MockClient) {
 				manager.EXPECT().ClusterFromContext(mock.Anything).Return(cluster, nil)
@@ -305,9 +305,9 @@ func TestAuthorizationModelGeneration_Process(t *testing.T) {
 				}).Once()
 				kcpClient.EXPECT().Get(mock.Anything, mock.Anything, mock.Anything).RunAndReturn(func(ctx context.Context, nn types.NamespacedName, o ctrlruntimeclient.Object, opts ...ctrlruntimeclient.GetOption) error {
 					if rs, ok := o.(*kcpapisv1alpha1.APIResourceSchema); ok {
-						rs.Spec.Group = "veryverylonggroup.platform-mesh.org"
-						rs.Spec.Names.Plural = "plural"
-						rs.Spec.Names.Singular = "singular"
+						rs.Spec.Group = "generators.external-secrets.io"
+						rs.Spec.Names.Plural = "beyondtrustworkloadcredentialsdynamicsecrets"
+						rs.Spec.Names.Singular = "beyondtrustworkloadcredentialsdynamicsecret"
 						rs.Spec.Scope = apiextensionsv1.ClusterScoped
 						return nil
 					}

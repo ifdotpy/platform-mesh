@@ -29,11 +29,13 @@ import (
 	"go.platform-mesh.io/golang-commons/logger"
 	iclient "go.platform-mesh.io/security-operator/internal/client"
 	"go.platform-mesh.io/security-operator/internal/config"
+	"go.platform-mesh.io/security-operator/internal/util"
 	"go.platform-mesh.io/subroutines"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -329,13 +331,10 @@ func (a *AuthorizationModelGenerationSubroutine) Process(ctx context.Context, ob
 			return subroutines.OK(), fmt.Errorf("getting APIResourceSchema: %w", err)
 		}
 
-		longestRelationName := fmt.Sprintf("create_%s_%s", resourceSchema.Spec.Group, resourceSchema.Spec.Names.Plural)
-
-		group := resourceSchema.Spec.Group
-
-		if len(longestRelationName) > 50 {
-			group = resourceSchema.Spec.Group[len(longestRelationName)-50:]
-		}
+		group := util.CapGroupToRelationLength(schema.GroupVersionResource{
+			Group:    resourceSchema.Spec.Group,
+			Resource: resourceSchema.Spec.Names.Plural,
+		}, 50)
 
 		permissionKey := resourceToPermissionKey(resourceSchema.Spec.Names.Singular, resourceSchema.Spec.Group)
 

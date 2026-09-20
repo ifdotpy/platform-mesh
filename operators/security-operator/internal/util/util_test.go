@@ -49,6 +49,12 @@ func TestCapGroupToRelationLength(t *testing.T) {
 			maxLength: 20,
 			want:      "name",
 		},
+		{
+			name:      "resource name leaves no room for the group without panicking",
+			gvr:       schema.GroupVersionResource{Group: "generators.external-secrets.io", Version: "v1alpha1", Resource: "beyondtrustworkloadcredentialsdynamicsecrets"},
+			maxLength: 50,
+			want:      "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
