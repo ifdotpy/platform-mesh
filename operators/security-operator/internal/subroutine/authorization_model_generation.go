@@ -83,17 +83,17 @@ var modelTpl = template.Must(template.New("model").Parse(`module {{ .Name }}
 {{ if eq .Scope "Cluster" }}
 extend type core_platform-mesh_io_account
 	relations
-		define create_{{ .Group }}_{{ .Name }}: owner
-		define list_{{ .Group }}_{{ .Name }}: member
-		define watch_{{ .Group }}_{{ .Name }}: member
+		define create_{{ .Relation }}: owner
+		define list_{{ .Relation }}: member
+		define watch_{{ .Relation }}: member
 {{ end }}
 
 {{ if eq .Scope "Namespaced" }}
 extend type core_namespace
 	relations
-		define create_{{ .Group }}_{{ .Name }}: owner
-		define list_{{ .Group }}_{{ .Name }}: member
-		define watch_{{ .Group }}_{{ .Name }}: member
+		define create_{{ .Relation }}: owner
+		define list_{{ .Relation }}: member
+		define watch_{{ .Relation }}: member
 {{ end }}
 
 type {{ .Group }}_{{ .Singular }}
@@ -122,6 +122,7 @@ type {{ .Group }}_{{ .Singular }}
 type modelInput struct {
 	Name     string
 	Group    string
+	Relation string
 	Singular string
 	Scope    string
 
@@ -341,6 +342,7 @@ func (a *AuthorizationModelGenerationSubroutine) Process(ctx context.Context, ob
 		input := modelInput{
 			Name:     resourceSchema.Spec.Names.Plural,
 			Group:    strings.ReplaceAll(group, ".", "_"),
+			Relation: strings.ReplaceAll(util.ResourceRelationName(schema.GroupVersionResource{Group: resourceSchema.Spec.Group, Resource: resourceSchema.Spec.Names.Plural}, 50), ".", "_"),
 			Singular: resourceSchema.Spec.Names.Singular,
 			Scope:    string(resourceSchema.Spec.Scope),
 		}
