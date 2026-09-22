@@ -314,7 +314,19 @@ func TestAuthorizationModelGeneration_Process(t *testing.T) {
 					return nil
 				}).Once()
 				kcpClient.EXPECT().Get(mock.Anything, mock.Anything, mock.Anything).Return(nil)
-				kcpClient.EXPECT().Update(mock.Anything, mock.Anything).Return(nil).Maybe()
+				kcpClient.EXPECT().Update(mock.Anything, mock.MatchedBy(func(obj ctrlruntimeclient.Object) bool {
+					_, ok := obj.(*pmcorev1alpha1.AuthorizationModel)
+					return ok
+				})).RunAndReturn(func(_ context.Context, obj ctrlruntimeclient.Object, _ ...ctrlruntimeclient.UpdateOption) error {
+					model := obj.(*pmcorev1alpha1.AuthorizationModel)
+					assert.Contains(t, model.Spec.Model, "\ntype _beyondtrustworkloadcredentialsdynamicsecret\n")
+					assert.Contains(t, model.Spec.Model, "define create_eyondtrustworkloadcredentialsdynamicsecrets:")
+					return nil
+				}).Once()
+				kcpClient.EXPECT().Update(mock.Anything, mock.MatchedBy(func(obj ctrlruntimeclient.Object) bool {
+					_, ok := obj.(*pmcorev1alpha1.AuthorizationModel)
+					return !ok
+				})).Return(nil).Maybe()
 				kcpClient.EXPECT().Create(mock.Anything, mock.Anything).Return(nil).Maybe()
 			},
 		},

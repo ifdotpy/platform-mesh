@@ -144,10 +144,8 @@ func BuildObjectType(gvr schema.GroupVersionResource, singular string) (string, 
 	group = strings.ReplaceAll(group, ".", "_")
 
 	objectType := fmt.Sprintf("%s_%s", group, singular)
-	longestObjectType := fmt.Sprintf("create_%ss", objectType)
-	if len(longestObjectType) > maxRelationLength {
-		objectType = objectType[len(longestObjectType)-maxRelationLength:]
-	}
+	// The model uses the capped group and the complete singular name.
+	// The 50-character limit applies to relations, not object types.
 
 	return group, objectType
 }
